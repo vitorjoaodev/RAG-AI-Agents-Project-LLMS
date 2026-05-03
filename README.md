@@ -1,33 +1,52 @@
-🤖 BIM AI Agent
-Pipeline de IA com RAG, LLM e Agente Autônomo para automação de dados BIM/Revit
+# 🤖 LLMS AI Agent RAG Project
 
-Python FastAPI LangChain OpenAI ChromaDB n8n Docker
+<div align="center">
 
-🧠 Visão Geral
-Este projeto é um agente de Inteligência Artificial especializado em dados BIM (Building Information Modeling) exportados do Revit. Combina três tecnologias centrais de IA moderna:
+**AI Pipeline with RAG, LLM and Autonomous Agent for BIM/Revit data automation**
 
-Tecnologia	O que faz neste projeto
-🔍 RAG (Retrieval-Augmented Generation)	Indexa os dados do Revit em um vector store e recupera informações relevantes antes de gerar respostas
-🧠 LLM (Large Language Model)	GPT-3.5-turbo processa linguagem natural, interpreta dados de engenharia e gera respostas contextuais
-🤖 AI Agent	Agente autônomo com memória de sessão que decide quais ferramentas usar para responder cada pergunta
-O fluxo de automação foi originalmente desenvolvido em n8n e depois expandido com uma camada de IA em Python/LangChain, criando um sistema híbrido low-code + código que roda via API REST.
+![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
+![LangChain](https://img.shields.io/badge/LangChain-LLM_Framework-1C3C3C?style=for-the-badge)
+![OpenAI](https://img.shields.io/badge/OpenAI-GPT--3.5-412991?style=for-the-badge&logo=openai&logoColor=white)
+![ChromaDB](https://img.shields.io/badge/ChromaDB-Vector_Store-orange?style=for-the-badge)
+![n8n](https://img.shields.io/badge/n8n-Automation-EA4B71?style=for-the-badge)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 
-🏗️ Arquitetura Completa
+</div>
+
+---
+
+## 🧠 Overview
+
+This project is an **Artificial Intelligence agent** specialized in **BIM (Building Information Modeling)** data exported from **Revit**. It combines three core modern AI technologies:
+
+| Technology | Role in this project |
+|---|---|
+| 🔍 **RAG** (Retrieval-Augmented Generation) | Indexes Revit data into a vector store and retrieves relevant information before generating responses |
+| 🧠 **LLM** (Large Language Model) | GPT-3.5-turbo processes natural language, interprets engineering data and generates contextual responses |
+| 🤖 **AI Agent** | Autonomous agent with session memory that decides which tools to use for each question |
+
+The automation pipeline was **originally built in n8n** and later expanded with an AI layer in Python/LangChain, creating a hybrid low-code + code system exposed as a REST API.
+
+---
+
+## 🏗️ Full Architecture
+
+```
 ╔══════════════════════════════════════════════════════════════════╗
-║                      ENTRADA DE DADOS                           ║
+║                        DATA INPUT                               ║
 ║                                                                  ║
 ║   Revit Export ──► Google Sheets ──► n8n Workflow               ║
-║   (Keynotes, Áreas,    (Planilha     (Agrupamento JS +           ║
-║    Comprimentos,        Revit JV)     Cruzamento Cadastro)       ║
-║    Contagens)                                                    ║
+║   (Keynotes, Areas,    (Revit JV      (JS Grouping +            ║
+║    Lengths, Counts)     Sheet)         Catalog Lookup)          ║
 ╚══════════════════════════════════════════════════════════════════╝
                               │
                               ▼
 ╔══════════════════════════════════════════════════════════════════╗
-║                      CAMADA RAG                                  ║
+║                        RAG LAYER                                 ║
 ║                                                                  ║
-║   Dados Revit                                                    ║
-║   Processados  ──► Text Splitter ──► OpenAI Embeddings           ║
+║   Processed                                                      ║
+║   Revit Data   ──► Text Splitter ──► OpenAI Embeddings           ║
 ║                                           │                      ║
 ║                                           ▼                      ║
 ║                                      ChromaDB                    ║
@@ -53,7 +72,7 @@ O fluxo de automação foi originalmente desenvolvido em n8n e depois expandido 
 ║     ConversationBufferWindowMemory (k=10)                        ║
 ║               │                                                  ║
 ║               ▼                                                  ║
-║          GPT-3.5-turbo ──► Resposta Final                        ║
+║          GPT-3.5-turbo ──► Final Response                        ║
 ╚══════════════════════════════════════════════════════════════════╝
                               │
                               ▼
@@ -63,143 +82,233 @@ O fluxo de automação foi originalmente desenvolvido em n8n e depois expandido 
 ║   POST /chat          POST /process       POST /upload           ║
 ║   POST /query/keynote GET  /health                               ║
 ║                                                                  ║
-║   ← Chamável via n8n HTTP node, Make, AWS Lambda, qualquer coisa ║
+║   ← Callable from n8n HTTP node, Make, AWS Lambda, anything     ║
 ╚══════════════════════════════════════════════════════════════════╝
-🔍 RAG — Retrieval-Augmented Generation
-O RAG é o núcleo de inteligência deste projeto. Em vez de apenas passar os dados brutos ao LLM (o que seria caro e impreciso), o sistema:
+```
 
-1. Indexação (uma vez):
+---
 
-Dados Revit → Chunking → Embeddings (OpenAI) → ChromaDB
-2. Consulta (em tempo real):
+## 🔍 RAG — Retrieval-Augmented Generation
 
-Pergunta do usuário → Embedding da pergunta
-                           │
-                           ▼
-                    Similarity Search
-                    no ChromaDB (k=4)
-                           │
-                           ▼
-              Chunks relevantes recuperados
-                           │
-                           ▼
-               LLM recebe: [contexto + pergunta]
-                           │
-                           ▼
-                    Resposta precisa
-Por que RAG aqui? Os dados do Revit podem ter centenas de Keynotes. Sem RAG, enviar tudo ao LLM seria inviável e impreciso. Com RAG, o modelo recebe apenas os 4 chunks mais relevantes para cada pergunta.
+RAG is the intelligence core of this project. Instead of passing raw data directly to the LLM (expensive and imprecise), the system works in two stages:
 
-🤖 AI Agent — Agente Autônomo
-O agente usa LangChain AgentExecutor com OpenAI Tools e decide autonomamente qual ação tomar:
+**1. Indexing (once):**
+```
+Revit Data → Chunking → Embeddings (OpenAI) → ChromaDB
+```
 
-# O agente tem 3 ferramentas disponíveis:
+**2. Query (real-time):**
+```
+User question → Question embedding
+                      │
+                      ▼
+               Similarity Search
+               in ChromaDB (k=4)
+                      │
+                      ▼
+          Relevant chunks retrieved
+                      │
+                      ▼
+       LLM receives: [context + question]
+                      │
+                      ▼
+              Accurate response
+```
+
+**Why RAG here?**
+Revit projects can have hundreds of Keynotes. Without RAG, sending everything to the LLM would be unfeasible and inaccurate. With RAG, the model only receives the 4 most relevant chunks for each question.
+
+---
+
+## 🤖 AI Agent — Autonomous Agent
+
+The agent uses **LangChain AgentExecutor** with **OpenAI Tools** and autonomously decides which action to take:
+
+```python
+# The agent has 3 available tools:
 
 @tool
-def consultar_keynote(keynote: str) -> str:
-    """Busca dados de um Keynote específico no vector store"""
+def query_keynote(keynote: str) -> str:
+    """Fetches data for a specific Keynote from the vector store"""
 
 @tool
-def perguntar_sobre_revit(pergunta: str) -> str:
-    """RAG — responde perguntas em linguagem natural sobre o projeto"""
+def ask_about_revit(question: str) -> str:
+    """RAG — answers natural language questions about the project data"""
 
 @tool
-def processar_planilhas(revit_url, catalog_url, output_url) -> str:
-    """Lê, processa e atualiza as planilhas Google Sheets"""
-Exemplos de raciocínio do agente:
+def process_sheets(revit_url, catalog_url, output_url) -> str:
+    """Reads, processes and updates Google Sheets"""
+```
 
-"Qual a área total do ARQ.01.001?" → Agente chama consultar_keynote("ARQ.01.001") → retorna dados do RAG → LLM formata resposta
+**Agent reasoning examples:**
 
-"Quais elementos têm status DEMOLIÇÃO?" → Agente chama perguntar_sobre_revit("elementos com status demolição") → RAG busca → LLM lista
+> *"What is the total area of ARQ.01.001?"*
+> → Agent calls `query_keynote("ARQ.01.001")` → RAG returns data → LLM formats response
 
-"Processe as planilhas do projeto X" → Agente chama processar_planilhas(url1, url2, url3) → atualiza Google Sheets → confirma
+> *"Which elements have DEMOLITION status?"*
+> → Agent calls `ask_about_revit("elements with demolition status")` → RAG searches → LLM lists
 
-🧠 LLM — Large Language Model
-Modelo: gpt-3.5-turbo (OpenAI)
-Framework: LangChain
-Temperatura: 0 (respostas determinísticas para dados de engenharia)
-Memória: ConversationBufferWindowMemory com janela de 10 mensagens — o agente lembra do contexto da conversa
-System Prompt: especializado em BIM/Revit, responde em português
-⚡ Stack Tecnológica
+> *"Process the sheets for project X"*
+> → Agent calls `process_sheets(url1, url2, url3)` → updates Google Sheets → confirms
+
+---
+
+## 🧠 LLM — Large Language Model
+
+- **Model:** `gpt-3.5-turbo` (OpenAI)
+- **Framework:** LangChain
+- **Temperature:** 0 (deterministic responses for engineering data)
+- **Memory:** `ConversationBufferWindowMemory` with a window of **10 messages** — the agent remembers conversation context
+- **System Prompt:** specialized in BIM/Revit
+
+---
+
+## ⚡ Tech Stack
+
+```
 ┌─────────────────────────────────────────────────────┐
-│  IA & LLM                                           │
-│  ├── LangChain 0.2        (framework de agentes)    │
+│  AI & LLM                                           │
+│  ├── LangChain 0.2        (agent framework)         │
 │  ├── OpenAI GPT-3.5-turbo (LLM)                     │
-│  ├── OpenAI Embeddings    (vetorização)             │
-│  └── ChromaDB             (vector store local)      │
+│  ├── OpenAI Embeddings    (vectorization)           │
+│  └── ChromaDB             (local vector store)      │
 ├─────────────────────────────────────────────────────┤
 │  API & Backend                                      │
 │  ├── FastAPI              (REST API)                │
 │  └── Uvicorn              (ASGI server)             │
 ├─────────────────────────────────────────────────────┤
-│  Automação & Dados                                  │
-│  ├── n8n                  (workflow original)       │
+│  Automation & Data                                  │
+│  ├── n8n                  (original workflow)       │
 │  ├── gspread              (Google Sheets API)       │
 │  └── Python 3.11                                    │
 ├─────────────────────────────────────────────────────┤
-│  Infraestrutura                                     │
+│  Infrastructure                                     │
 │  ├── Docker + Docker Compose                        │
-│  └── Railway / Render (deploy gratuito)             │
+│  └── Railway / Render (free deploy)                 │
 └─────────────────────────────────────────────────────┘
-🗂️ Estrutura do Projeto
+```
+
+---
+
+## 🗂️ Project Structure
+
+```
 bim-ai-agent/
 │
 ├── app/
-│   ├── main.py          # 🌐 API FastAPI — rotas e endpoints
-│   ├── rag.py           # 🔍 RAG — indexação, embeddings, ChromaDB
-│   └── agent.py         # 🤖 Agent — LangChain, Tools, Memória
+│   ├── main.py          # 🌐 FastAPI — routes and endpoints
+│   ├── rag.py           # 🔍 RAG — indexing, embeddings, ChromaDB
+│   └── agent.py         # 🤖 Agent — LangChain, Tools, Memory
 │
 ├── n8n/
-│   └── workflow.json    # ⚙️  Workflow n8n original (importável)
+│   └── workflow.json    # ⚙️  Original n8n workflow (importable)
 │
 ├── docs/
-│   └── exemplo_revit_export.csv   # 📄 CSV exemplo para testes
+│   └── exemplo_revit_export.csv   # 📄 Sample CSV for testing
 │
-├── .env.example         # 🔐 Variáveis de ambiente
-├── docker-compose.yml   # 🐳 API + n8n local
+├── .env.example         # 🔐 Environment variables
+├── docker-compose.yml   # 🐳 API + local n8n
 ├── Dockerfile
 └── requirements.txt
-🚀 Como Rodar
-Pré-requisitos
-Python 3.11+
-Docker (opcional)
-Chave da API OpenAI
-Service Account Google (para Google Sheets)
-1. Clone
-git clone https://github.com/SEU_USUARIO/bim-ai-agent.git
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Python 3.11+
+- Docker (optional)
+- OpenAI API Key
+- Google Service Account (for Google Sheets)
+
+### 1. Clone
+
+```bash
+git clone https://github.com/YOUR_USERNAME/bim-ai-agent.git
 cd bim-ai-agent
-2. Configure o .env
+```
+
+### 2. Set up `.env`
+
+```bash
 cp .env.example .env
-# Adicione sua OPENAI_API_KEY e credenciais Google
-3. Suba com Docker
+# Add your OPENAI_API_KEY and Google credentials
+```
+
+### 3. Run with Docker
+
+```bash
 docker-compose up --build
-4. Ou rode direto
+```
+
+### 4. Or run directly
+
+```bash
 pip install -r requirements.txt
 uvicorn app.main:app --reload
-📖 Documentação interativa: http://localhost:8000/docs
+```
 
-💬 Exemplos de Uso
-Chat com o Agente
+📖 Interactive docs: **http://localhost:8000/docs**
+
+---
+
+## 💬 Usage Examples
+
+### Chat with the Agent
+
+```bash
 curl -X POST http://localhost:8000/chat \
   -H "Content-Type: application/json" \
   -d '{
-    "message": "Quais keynotes têm status NOVO e qual a área total?",
-    "session_id": "projeto-vila-madalena"
+    "message": "Which keynotes have NEW status and what is the total area?",
+    "session_id": "project-123"
   }'
+```
+
+```json
 {
-  "response": "Os keynotes com status NOVO são ARQ.01.001 (20.80 m²), ARQ.01.003 (15.75 m²) e INS.04.001 (12 unidades). Área total NOVO: 36.55 m².",
-  "session_id": "projeto-vila-madalena"
+  "response": "Keynotes with NEW status are ARQ.01.001 (20.80 m²), ARQ.01.003 (15.75 m²) and INS.04.001 (12 units). Total NEW area: 36.55 m².",
+  "session_id": "project-123"
 }
-Upload de exportação Revit
+```
+
+### Upload Revit export
+
+```bash
 curl -X POST http://localhost:8000/upload/revit-csv \
   -F "file=@docs/exemplo_revit_export.csv"
-Acionar via n8n (HTTP Request node)
+```
+
+### Trigger via n8n (HTTP Request node)
+
+```
 URL: http://localhost:8000/chat
 Method: POST
 Body: { "message": "{{ $json.chatInput }}", "session_id": "{{ $json.sessionId }}" }
-🔗 Integração n8n
-O workflow original está em n8n/workflow.json. Para importar:
+```
 
-Abra seu n8n → Workflows → Import from File
-Selecione n8n/workflow.json
-Configure credenciais Google Sheets e OpenAI
-Adicione um HTTP Request node apontando para a API deste projeto
+---
+
+## 🔗 n8n Integration
+
+The original workflow is at `n8n/workflow.json`. To import it:
+
+1. Open your n8n → **Workflows → Import from File**
+2. Select `n8n/workflow.json`
+3. Configure your Google Sheets and OpenAI credentials
+4. Add an **HTTP Request node** pointing to this project's API
+
+---
+
+## 📄 License
+
+MIT — free to use, adapt and evolve.
+
+---
+
+<div align="center">
+
+Built with **LangChain** · **OpenAI** · **FastAPI** · **n8n** · **ChromaDB**
+
+</div>
