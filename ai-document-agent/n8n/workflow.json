@@ -1,0 +1,844 @@
+{
+  "name": "1 Processo completo copy",
+  "nodes": [
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1uJTNdlEFZOQTs2D6nwU8dLhqjwOq52WLF73ar5QyjAM/edit?gid=1979572939#gid=1979572939",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "PLANILHA REVT JV",
+          "mode": "name"
+        },
+        "options": {
+          "dataLocationOnSheet": {
+            "values": {
+              "rangeDefinition": "specifyRangeA1",
+              "range": "A:H"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -432,
+        -80
+      ],
+      "id": "a8fba996-70da-4224-8a57-cb962e57ec30",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "SrJJ4C3qbxOHdPI0",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Agrupar dados do Revit por Keynote (limpando tabs e espaços)\nconst items = $input.all();\nconst agrupado = {};\n\nconsole.log('=== PROCESSANDO PLANILHA REVIT ===');\nconsole.log('Total de linhas:', items.length);\n\nitems.forEach((item, index) => {\n  const row = item.json;\n  \n  // Limpar tabs e espaços dos nomes das colunas\n  const area = row['Area'] || '';\n  const length = row['\tLenght'] || row['Lenght'] || '';\n  const count = row['\tCount'] || row['Count'] || '';\n  const keynote = row['        Keynote'] || row['Keynote'] || '';\n  const status = row['        Status'] || row['Status'] || '';\n  \n  // Limpar tabs e espaços dos VALORES\n  const keynoteLimpo = String(keynote).replace(/[\\t\\s]/g, '').trim();\n  \n  // Pular se não tiver Keynote válido\n  if (!keynoteLimpo || keynoteLimpo.length < 3) {\n    return;\n  }\n  \n  // Inicializar\n  if (!agrupado[keynoteLimpo]) {\n    agrupado[keynoteLimpo] = {\n      keynote: keynoteLimpo,\n      status: '',\n      areas: [],\n      lengths: [],\n      counts: []\n    };\n  }\n  \n  // Adicionar valores\n  const areaNum = parseFloat(String(area).replace(/[\\t\\s]/g, '')) || 0;\n  const lengthNum = parseFloat(String(length).replace(/[\\t\\s]/g, '')) || 0;\n  const countNum = parseFloat(String(count).replace(/[\\t\\s]/g, '')) || 0;\n  \n  if (areaNum > 0) agrupado[keynoteLimpo].areas.push(areaNum);\n  if (lengthNum > 0) agrupado[keynoteLimpo].lengths.push(lengthNum);\n  if (countNum > 0) agrupado[keynoteLimpo].counts.push(countNum);\n  \n  // Status (primeiro não vazio)\n  const statusLimpo = String(status).replace(/[\\t\\s]+/g, ' ').trim();\n  if (statusLimpo && !agrupado[keynoteLimpo].status) {\n    agrupado[keynoteLimpo].status = statusLimpo;\n  }\n});\n\n// Formatar resultado\nconst resultado = Object.values(agrupado).map(grupo => {\n  const areaText = grupo.areas.length > 0\n    ? `(${grupo.areas.length} resultados): ${grupo.areas.join(' + ')} / Soma = ${grupo.areas.reduce((a,b) => a+b, 0).toFixed(2)}`\n    : '';\n  \n  const lengthText = grupo.lengths.length > 0\n    ? `(${grupo.lengths.length} resultados): ${grupo.lengths.join(' + ')} / Soma = ${grupo.lengths.reduce((a,b) => a+b, 0).toFixed(2)}`\n    : '';\n  \n  const countText = grupo.counts.length > 0\n    ? `(${grupo.counts.length} resultados): ${grupo.counts.map(c => Math.round(c)).join(' + ')} / Soma = ${Math.round(grupo.counts.reduce((a,b) => a+b, 0))}`\n    : '';\n  \n  return {\n    json: {\n      Código: grupo.keynote,\n      Status: grupo.status,\n      'AREA m2': areaText,\n      'COMPRIMENTO m': lengthText,\n      'CONTAGEM UNID': countText\n    }\n  };\n});\n\nconsole.log('Total de Keynotes únicos:', resultado.length);\nreturn resultado;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        -80
+      ],
+      "id": "6fcdbca0-4721-45b7-94b4-795e08ca701a",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1UtA5XoZOEa5kI-IKPR_DDo_6SoEqi1TzOJ-zoMBBSI8/edit?gid=473352320#gid=473352320",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "CADASTRO",
+          "mode": "name"
+        },
+        "options": {
+          "dataLocationOnSheet": {
+            "values": {
+              "rangeDefinition": "specifyRangeA1",
+              "range": "A:N"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        32,
+        -80
+      ],
+      "id": "17e33b12-3bc7-421d-8f65-d9f792968bae",
+      "name": "Get row(s) in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "SrJJ4C3qbxOHdPI0",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "clear",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1G7yZfJ9x4prsM1QoCIAZcTqIno6zj5dv8mHr-XpsEF8/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Página1",
+          "mode": "name"
+        },
+        "clear": "specificRange",
+        "range": "A3:O1000"
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        304,
+        -80
+      ],
+      "id": "be62c08e-bb9d-4e3e-878d-14986ccd6a7f",
+      "name": "Clear sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "SrJJ4C3qbxOHdPI0",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1G7yZfJ9x4prsM1QoCIAZcTqIno6zj5dv8mHr-XpsEF8/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Página1",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Categoria": "={{ $json.Categoria }}",
+            "Subcategoria": "={{ $json.Subcategoria }}",
+            "Grupo": "={{ $json.Grupo }}",
+            "Código": "={{ $json.Código }}",
+            "Status": "={{ $json.Status }}",
+            "Descrição": "={{ $json.Descrição }}",
+            "NOVO_Alimenta": "={{ $json.NOVO_Alimenta }}",
+            "DEMOLIÇÃO_alimenta": "={{ $json.DEMOLIÇÃO_alimenta }}",
+            "EXISTENTE MANTIDO_alimenta": "={{ $json[\"EXISTENTE MANTIDO_alimenta\"] }}",
+            "REMANEJADO EXTERNO_alimenta": "={{ $json[\"REMANEJADO EXTERNO_alimenta\"] }}",
+            "REMANEJADO LOCAL_alimenta": "={{ $json[\"REMANEJADO LOCAL_alimenta\"] }}",
+            "Unidade de medida": "={{ $json[\"Unidade de medida\"] }}",
+            "AREA m2": "={{ $json[\"AREA m2\"] }}",
+            "COMPRIMENTO m": "={{ $json[\"COMPRIMENTO m\"] }}",
+            "CONTAGEM UNID": "={{ $json[\"CONTAGEM UNID\"] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Categoria",
+              "displayName": "Categoria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Subcategoria",
+              "displayName": "Subcategoria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Grupo",
+              "displayName": "Grupo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Código",
+              "displayName": "Código",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Descrição",
+              "displayName": "Descrição",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "NOVO_Alimenta",
+              "displayName": "NOVO_Alimenta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "DEMOLIÇÃO_alimenta",
+              "displayName": "DEMOLIÇÃO_alimenta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "EXISTENTE MANTIDO_alimenta",
+              "displayName": "EXISTENTE MANTIDO_alimenta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "REMANEJADO EXTERNO_alimenta",
+              "displayName": "REMANEJADO EXTERNO_alimenta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "REMANEJADO LOCAL_alimenta",
+              "displayName": "REMANEJADO LOCAL_alimenta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Unidade de medida",
+              "displayName": "Unidade de medida",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "AREA m2",
+              "displayName": "AREA m2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "COMPRIMENTO m",
+              "displayName": "COMPRIMENTO m",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "CONTAGEM UNID",
+              "displayName": "CONTAGEM UNID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        560,
+        -80
+      ],
+      "id": "1cb9d366-30ff-4059-b7ca-71ea709fe22b",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "SrJJ4C3qbxOHdPI0",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "Gerar a planilha X com base planilha y e revit\n",
+        "height": 128,
+        "width": 368
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -288,
+        -288
+      ],
+      "typeVersion": 1,
+      "id": "9fa36de0-fef0-4f03-8f85-579b65f47d9d",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1szy_3e5AWfB7P1m0wsR2hS61XRFSNrQyvrRfkg8xJBo/edit?gid=1052992077#gid=1052992077",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "CADASTRO (2)",
+          "mode": "name"
+        },
+        "options": {
+          "dataLocationOnSheet": {
+            "values": {
+              "rangeDefinition": "specifyRangeA1",
+              "range": "A1:L18"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1088,
+        -80
+      ],
+      "id": "8a03be44-9f5f-42f5-ac65-7035b330e9ab",
+      "name": "Ler Planilha X",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "SrJJ4C3qbxOHdPI0",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extrai códigos E busca dados da Planilha Y (tudo junto)\nconst itemsX = $input.all();\nconst dadosPlanilhaY = $('Get row(s) in sheet2').all(); // Node 11\n\nconst codigosParaBuscar = [];\n\nitemsX.forEach((item, index) => {\n  if (index === 0 || index === 1) return;\n  \n  const row = item.json;\n  const codigoPrincipal = (row.Código || '').trim();\n  if (!codigoPrincipal) return;\n  \n  const colunas = {\n    'G': row.NOVO_Alimenta || '',\n    'H': row['DEMOLIÇÃO_alimenta'] || '',\n    'I': row['EXISTENTE MANTIDO_alimenta'] || '',\n    'J': row['REMANEJADO EXTERNO_alimenta'] || '',\n    'K': row['REMANEJADO LOCAL_alimenta'] || ''\n  };\n  \n  Object.keys(colunas).forEach(col => {\n    const conteudo = colunas[col];\n    if (conteudo && conteudo.trim()) {\n      conteudo.split(/[,\\n]+/).forEach((codigo, idx) => {\n        const limpo = codigo.trim();\n        if (limpo && limpo.length > 2 && !(idx === 0 && limpo === codigoPrincipal)) {\n          codigosParaBuscar.push(limpo);\n        }\n      });\n    }\n  });\n});\n\n// Remover duplicatas\nconst codigosUnicos = [...new Set(codigosParaBuscar)];\n\n// BUSCAR na Planilha Y imediatamente\nconst resultado = [];\ncodigosUnicos.forEach(codigo => {\n  const linhaY = dadosPlanilhaY.find(item => \n    String(item.json['Código'] || '').trim() === codigo\n  );\n  \n  if (linhaY) {\n    const row = linhaY.json;\n    resultado.push({ \n      json: {\n        'Categoria': row['Categoria'] || '',\n        'Subcategoria': row['Subcategoria'] || '',\n        'Grupo': row['Grupo'] || '',\n        'Código': codigo,\n        'Status': '',\n        'Descrição': row['Descrição'] || '',\n        'NOVO_Alimenta': row['NOVO_Alimenta'] || '',\n        'DEMOLIÇÃO_alimenta': row['DEMOLIÇÃO_alimenta'] || '',\n        'EXISTENTE MANTIDO_alimenta': row['EXISTENTE MANTIDO_alimenta'] || '',\n        'REMANEJADO EXTERNO_alimenta': row['REMANEJADO EXTERNO_alimenta'] || '',\n        'REMANEJADO LOCAL_alimenta': row['REMANEJADO LOCAL_alimenta'] || '',\n        'Unidade de medida': row['Unidade de medida'] || ''\n      }\n    });\n  }\n});\n\nreturn resultado;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        -80
+      ],
+      "id": "03aa84b2-57de-4b4c-8db2-e5444aeba3e5",
+      "name": "Extrair Códigos"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1T4Oq3cbyBya4LOxTIDagUnd-Os2C8xHnx9uxsEZP92o/edit?gid=473352320#gid=473352320",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "CADASTRO",
+          "mode": "name"
+        },
+        "options": {
+          "dataLocationOnSheet": {
+            "values": {
+              "rangeDefinition": "specifyRangeA1",
+              "range": "A:N"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1648,
+        -80
+      ],
+      "id": "65c7c1a2-c517-436f-81b7-341b64526e2e",
+      "name": "Buscar na Planilha Y",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "SrJJ4C3qbxOHdPI0",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1szy_3e5AWfB7P1m0wsR2hS61XRFSNrQyvrRfkg8xJBo/edit?gid=1052992077#gid=1052992077",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "CADASTRO (2)",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Categoria": "={{ $json.Categoria }}",
+            "Subcategoria": "={{ $json.Subcategoria }}",
+            "Grupo": "={{ $json.Grupo }}",
+            "Código": "={{ $json.Código }}",
+            "Status": "={{ $json.Status }}",
+            "Descrição": "={{ $json.Descrição }}",
+            "NOVO_Alimenta": "={{ $json.NOVO_Alimenta }}",
+            "DEMOLIÇÃO_alimenta": "={{ $json.DEMOLIÇÃO_alimenta }}",
+            "EXISTENTE MANTIDO_alimenta": "={{ $json[\"EXISTENTE MANTIDO_alimenta\"] }}",
+            "REMANEJADO EXTERNO_alimenta": "={{ $json[\"REMANEJADO EXTERNO_alimenta\"] }}",
+            "REMANEJADO LOCAL_alimenta": "={{ $json[\"REMANEJADO LOCAL_alimenta\"] }}",
+            "Unidade de medida": "={{ $json[\"Unidade de medida\"] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Categoria",
+              "displayName": "Categoria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Subcategoria",
+              "displayName": "Subcategoria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Grupo",
+              "displayName": "Grupo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Código",
+              "displayName": "Código",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Descrição",
+              "displayName": "Descrição",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "NOVO_Alimenta",
+              "displayName": "NOVO_Alimenta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "DEMOLIÇÃO_alimenta",
+              "displayName": "DEMOLIÇÃO_alimenta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "EXISTENTE MANTIDO_alimenta",
+              "displayName": "EXISTENTE MANTIDO_alimenta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "REMANEJADO EXTERNO_alimenta",
+              "displayName": "REMANEJADO EXTERNO_alimenta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "REMANEJADO LOCAL_alimenta",
+              "displayName": "REMANEJADO LOCAL_alimenta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Unidade de medida",
+              "displayName": "Unidade de medida",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1920,
+        -80
+      ],
+      "id": "ea31d459-3822-4089-8713-48fd406faaac",
+      "name": "Adicionar na Planilha X",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "SrJJ4C3qbxOHdPI0",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        816,
+        -80
+      ],
+      "id": "bb395eee-b55d-4d4b-b28a-39d2350a0797",
+      "name": "Wait",
+      "webhookId": "2775e051-2f7d-4192-8c45-d715101a3cb0"
+    },
+    {
+      "parameters": {
+        "content": "Completar a planilha x com base da planilha y com os dados da planilha x\n",
+        "height": 144,
+        "width": 368
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1040,
+        -288
+      ],
+      "typeVersion": 1,
+      "id": "c3bc0859-7ff2-4973-b653-01a4a33fa03e",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -752,
+        -80
+      ],
+      "id": "652f5a16-faa0-4d76-91a3-1366b17c0295",
+      "name": "When chat message received",
+      "webhookId": "163906b7-4bb1-4d62-8f68-50a235f86ee2"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-3.5-turbo",
+          "mode": "list",
+          "cachedResultName": "GPT-3.5-TURBO"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $json.chatInput }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -816,
+        -400
+      ],
+      "id": "47139bca-33da-4560-be27-872c8140245d",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "Lfc2helBcRmZoaxw",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -464,
+        -480
+      ],
+      "id": "a7304f5c-3cb0-4713-8164-9f61de5b3fc0",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryManager",
+      "typeVersion": 1.1,
+      "position": [
+        -464,
+        -704
+      ],
+      "id": "3dc25d35-ed27-4092-9bfa-a517e9f5d1c9",
+      "name": "Chat Memory Manager"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Clear sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clear sheet": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ler Planilha X": {
+      "main": [
+        [
+          {
+            "node": "Extrair Códigos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrair Códigos": {
+      "main": [
+        [
+          {
+            "node": "Buscar na Planilha Y",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar na Planilha Y": {
+      "main": [
+        [
+          {
+            "node": "Adicionar na Planilha X",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Ler Planilha X",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Chat Memory Manager",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Chat Memory Manager",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat Memory Manager": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "20acbb7d-64a7-4c67-a56b-f3ea453dfd8b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e51be1ff7ef7998c043f85e49061d5e7e14cef61583edd33ed1cce824b240267"
+  },
+  "id": "RHUECu3819Sq6d1N",
+  "tags": []
+}
